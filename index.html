@@ -2,51 +2,114 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>SEIKINFANSITE UNOFFICIAL</title>
+  <title>SEIKINFANSITE - 覚醒ボタン</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: #fff5f5;
+      font-family: 'Hiragino Kaku Gothic Pro', sans-serif;
+      background: linear-gradient(to bottom right, #ffe0e0, #fff0f0);
       text-align: center;
-      padding-top: 100px;
+      padding-top: 80px;
+      color: #d63384;
     }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
     button {
-      padding: 15px 30px;
-      font-size: 1.2em;
-      background-color: #ff69b4;
+      padding: 18px 40px;
+      font-size: 1.4em;
+      background: linear-gradient(45deg, #ff6ec4, #f72599);
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 20px;
       cursor: pointer;
+      box-shadow: 0 8px 15px rgba(255, 50, 120, 0.3);
       transition: all 0.3s ease;
     }
+
     button:hover {
-      background-color: #ff1493;
+      transform: scale(1.05);
+      box-shadow: 0 10px 20px rgba(255, 50, 120, 0.5);
     }
+
     #result {
       margin-top: 30px;
-      font-size: 1.5em;
-      color: #c71585;
+      font-size: 1.8em;
+      color: #b91c6c;
+      opacity: 0;
+      animation: fadeIn 1s forwards;
+    }
+
+    #character {
+      width: 300px;
+      height: auto;
+      margin: 20px auto;
+      display: block;
+      opacity: 0;
+      animation: fadeIn 1.5s forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
     }
   </style>
 </head>
 <body>
 
-  <h1>✨ SEIKINFANSITE 小テスト ✨</h1>
-  <button onclick="onButtonClick()">押してみて♡</button>
+  <h1>💋 SEIKINFANSITE 覚醒モード 💋</h1>
+  <button onclick="onButtonClick()">押して…ください…♡</button>
+
   <div id="result"></div>
+  <img id="character" src="" style="display:none;">
+
+  <!-- 音声ファイル -->
+  <audio id="soundEffect">
+    <source src="https://www.soundjay.com/human/sounds/voice-laughing-soft-01.mp3"  type="audio/mpeg">
+    お使いのブラウザは音声をサポートしていません。
+  </audio>
 
   <script>
+    const messages = [
+      "んふふ…また触れてほしいです…",
+      "あなたが好き…ずっと見つめてて…",
+      "恥ずかしいけど…気持ちいい…",
+      "もっと…奥まで…届いてる…",
+      "ドキドキが止まらない～💦"
+    ];
+
+    const images = [
+      "img/SEXY1.jpg",
+      "img/SEXY2.jpg"
+      "img/SEXY3.jpg"];
+
+    let currentIndex = 0;
+
     function onButtonClick() {
-      const messages = [
-        "大好き～💕",
-        "ドキドキしちゃう…💓",
-        "あなたもセクシー？👀",
-        "えっちな妄想中…💭",
-        "見つめないで…恥ずかしい💦"
-      ];
+      // メッセージランダム表示
       const randomIndex = Math.floor(Math.random() * messages.length);
       document.getElementById('result').textContent = messages[randomIndex];
+
+      // 画像切り替え
+      currentIndex = (currentIndex + 1) % images.length;
+      const imgElement = document.getElementById("character");
+      imgElement.src = images[currentIndex];
+      imgElement.style.display = "block";
+
+      // アニメーションリセット（再発火用）
+      void imgElement.offsetWidth;
+      imgElement.style.opacity = 0;
+      setTimeout(() => {
+        imgElement.style.opacity = 1;
+      }, 50);
+
+      // 効果音再生
+      const sound = document.getElementById("soundEffect");
+      sound.currentTime = 0;
+      sound.play();
     }
   </script>
 
