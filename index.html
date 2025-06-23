@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>SEIKINFANSITE - 覚醒ボタン</title>
   <style>
     body {
@@ -10,7 +10,6 @@
       text-align: center;
       padding-top: 80px;
       color: #d63384;
-      margin: 0;
     }
 
     h1 {
@@ -65,10 +64,13 @@
   <button onclick="onButtonClick()">押して…ください…♡</button>
 
   <div id="result"></div>
-  <img id="character" src="" style="display:none;" />
+  <img id="character" src="" style="display:none;">
 
-  <!-- 音声プレイヤー -->
-  <audio id="soundEffect"></audio>
+  <!-- 音声ファイル -->
+  <audio id="soundEffect">
+    <source src="sound/hikakin-itazuranoyu.mp3"  type="audio/mpeg">
+    お使いのブラウザは音声をサポートしていません。
+  </audio>
 
   <script>
     const messages = [
@@ -79,19 +81,16 @@
       "ドキドキが止まらない～💦"
     ];
 
-    // GitHub Pages 対応パス（例）
     const images = [
       "img/SEXY1.jpg",
-      "img/SEXY2.jpg"
-    ];
-
-    const sounds = [
-      "sound/hikakin-itazuranoyu.mp3",
-      "sound/sexysound.mp3"
-    ];
+      "img/SEXY2.jpg",
+      "img/SEXY3.jpg",
+      "img/hikakinsexy.jpg",
+      "img/hikakinsexy1.jpg",];
+      "img/hikakinsexy2.jpg",
+      
 
     let currentIndex = 0;
-    let currentSoundIndex = 0;
 
     function onButtonClick() {
       // メッセージランダム表示
@@ -104,23 +103,17 @@
       imgElement.src = images[currentIndex];
       imgElement.style.display = "block";
 
-      // アニメーションリセット
+      // アニメーションリセット（再発火用）
       void imgElement.offsetWidth;
       imgElement.style.opacity = 0;
       setTimeout(() => {
         imgElement.style.opacity = 1;
       }, 50);
 
-      // 効果音再生 & 切り替え
+      // 効果音再生
       const sound = document.getElementById("soundEffect");
-
-      // 次の音声をセット
-      sound.src = sounds[currentSoundIndex];
       sound.currentTime = 0;
       sound.play();
-
-      // 音声インデックス更新
-      currentSoundIndex = (currentSoundIndex + 1) % sounds.length;
     }
   </script>
 
