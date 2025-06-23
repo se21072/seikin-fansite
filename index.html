@@ -1,20 +1,28 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>SEIKINFANSITE - 覚醒ボタン</title>
+  <meta charset="UTF-8" />
+  <title>💋 SEIKINFANSITE - 完全覚醒モード 💋</title>
   <style>
     body {
       font-family: 'Hiragino Kaku Gothic Pro', sans-serif;
       background: linear-gradient(to bottom right, #ffe0e0, #fff0f0);
       text-align: center;
-      padding-top: 80px;
+      padding-top: 60px;
       color: #d63384;
+      margin: 0;
+      transition: background 1s ease;
     }
 
     h1 {
       font-size: 2.5em;
       margin-bottom: 10px;
+      animation: popIn 0.8s ease-out;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
     button {
@@ -27,6 +35,7 @@
       cursor: pointer;
       box-shadow: 0 8px 15px rgba(255, 50, 120, 0.3);
       transition: all 0.3s ease;
+      margin: 10px;
     }
 
     button:hover {
@@ -37,7 +46,6 @@
     #result {
       margin-top: 30px;
       font-size: 1.8em;
-      color: #b91c6c;
       opacity: 0;
       animation: fadeIn 1s forwards;
     }
@@ -49,36 +57,71 @@
       display: block;
       opacity: 0;
       animation: fadeIn 1.5s forwards;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+
+    #character:hover {
+      transform: scale(1.05) rotate(1deg);
+    }
+
+    .sound-toggle,
+    .mode-toggle {
+      margin-top: 20px;
+    }
+
+    .sound-toggle input[type="checkbox"],
+    .mode-toggle input[type="checkbox"] {
+      transform: scale(1.5);
+      accent-color: hotpink;
+    }
+
+    .footer {
+      margin-top: 60px;
+      font-size: 0.9em;
+      color: #aaa;
     }
 
     @keyframes fadeIn {
-      to {
-        opacity: 1;
-      }
+      to { opacity: 1; }
     }
   </style>
 </head>
 <body>
 
-  <h1>💋 SEIKINFANSITE 覚醒モード 💋</h1>
-  <button onclick="onButtonClick()">押して…ください…♡</button>
+  <h1>💋 SEIKINFANSITE 完全覚醒モード 💋</h1>
+  <button onclick="onButtonClick()">もっと…感じて…♡</button>
 
   <div id="result"></div>
-  <img id="character" src="" style="display:none;">
+  <img id="character" src="" />
 
-  <!-- 音声ファイル -->
-  <audio id="soundEffect">
-    <source src="sound/haishikoro.mp3"  type="audio/mpeg">
-    お使いのブラウザは音声をサポートしていません。
-  </audio>
+  <!-- 音声プレイヤー -->
+  <audio id="soundEffect"></audio>
+
+  <!-- 音声再生モード切替 -->
+  <div class="sound-toggle">
+    <label>
+      <input type="checkbox" id="soundToggle" checked>
+      効果音ON/OFF
+    </label>
+  </div>
+
+  <div class="mode-toggle">
+    <label>
+      <input type="checkbox" id="randomSoundMode" checked>
+      音声をランダム再生
+    </label>
+  </div>
+
+  <div class="footer">© 2025 SEIKINFANSITE</div>
 
   <script>
     const messages = [
-      "んふふ…また触れてほしいです…",
-      "あなたが好き…ずっと見つめてて…",
-      "恥ずかしいけど…気持ちいい…",
-      "もっと…奥まで…届いてる…",
-      "ドキドキが止まらない～💦"
+      { text: "んふふ…また触れてほしいです…", emotion: "shy" },
+      { text: "あなたが好き…ずっと見つめてて…", emotion: "love" },
+      { text: "恥ずかしいけど…気持ちいい…", emotion: "blush" },
+      { text: "もっと…奥まで…届いてる…", emotion: "passion" },
+      { text: "ドキドキが止まらない～💦", emotion: "excite" }
     ];
 
     const images = [
@@ -89,22 +132,53 @@
       "img/hikakinsexy1.jpg",
       "img/hikakinsexy2.jpg",
       ];
-      
+
+    const sounds = [
+      "sound/haishikoro.mp3",
+      "sound/sexy_sound.mp3"
+      "sound/hikakin-itazuranoyu.mp3"
+    ];
 
     let currentIndex = 0;
+    let currentSoundIndex = 0;
+
+    // カラーパレット（感情ごと）
+    const colors = {
+      shy: "#ffb3d9",
+      love: "#ff66cc",
+      blush: "#ff80aa",
+      passion: "#ff4da6",
+      excite: "#ff1a99"
+    };
+
+    function getRandomColor() {
+      const keys = Object.keys(colors);
+      return colors[keys[Math.floor(Math.random() * keys.length)]];
+    }
+
+    function getGradientColor() {
+      const color1 = getRandomColor();
+      const color2 = getRandomColor();
+      return `linear-gradient(to bottom right, ${color1}, ${color2})`;
+    }
 
     function onButtonClick() {
+      // 背景変更
+      document.body.style.background = getGradientColor();
+
       // メッセージランダム表示
       const randomIndex = Math.floor(Math.random() * messages.length);
-      document.getElementById('result').textContent = messages[randomIndex];
+      const messageData = messages[randomIndex];
+      const result = document.getElementById('result');
+      result.textContent = messageData.text;
+      result.style.color = colors[messageData.emotion];
 
       // 画像切り替え
       currentIndex = (currentIndex + 1) % images.length;
       const imgElement = document.getElementById("character");
       imgElement.src = images[currentIndex];
-      imgElement.style.display = "block";
 
-      // アニメーションリセット（再発火用）
+      // アニメーションリセット
       void imgElement.offsetWidth;
       imgElement.style.opacity = 0;
       setTimeout(() => {
@@ -112,10 +186,43 @@
       }, 50);
 
       // 効果音再生
-      const sound = document.getElementById("soundEffect");
-      sound.currentTime = 0;
-      sound.play();
+      const soundToggle = document.getElementById("soundToggle").checked;
+      if (soundToggle) {
+        const sound = document.getElementById("soundEffect");
+
+        // 再生モード判定
+        if (document.getElementById("randomSoundMode").checked) {
+          currentSoundIndex = Math.floor(Math.random() * sounds.length);
+        }
+
+        sound.src = sounds[currentSoundIndex];
+        sound.currentTime = 0;
+        sound.play();
+
+        currentSoundIndex = (currentSoundIndex + 1) % sounds.length;
+      }
+
+      // ローカルストレージ保存
+      localStorage.setItem("lastMessage", messageData.text);
+      localStorage.setItem("lastImage", images[currentIndex]);
     }
+
+    // 前回状態を復元
+    window.onload = () => {
+      const lastMessage = localStorage.getItem("lastMessage");
+      const lastImage = localStorage.getItem("lastImage");
+
+      if (lastMessage) {
+        document.getElementById("result").textContent = lastMessage;
+      }
+
+      if (lastImage) {
+        const imgElement = document.getElementById("character");
+        imgElement.src = lastImage;
+        imgElement.style.display = "block";
+        imgElement.style.opacity = 1;
+      }
+    };
   </script>
 
 </body>
