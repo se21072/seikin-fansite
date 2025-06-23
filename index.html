@@ -1,11 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <title>Seikin Fan Site</title>
+  <meta charset="UTF-8">
+  <title>SEIKINFANSITE UNOFFICIAL</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #fff5f5;
+      text-align: center;
+      padding-top: 100px;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background-color: #ff1493;
+    }
+    #result {
+      margin-top: 30px;
+      font-size: 1.5em;
+      color: #c71585;
+    }
+  </style>
 </head>
 <body>
-  <h1>セイキンさん最高！</h1>
-  <p>非公式ファンサイトへようこそ！</p>
+
+  <h1>✨ SEIKINFANSITE 小テスト ✨</h1>
+  <button onclick="onButtonClick()">押してみて♡</button>
+  <div id="result"></div>
+
+  <script>
+    function onButtonClick() {
+      const messages = [
+        "大好き～💕",
+        "ドキドキしちゃう…💓",
+        "あなたもセクシー？👀",
+        "えっちな妄想中…💭",
+        "見つめないで…恥ずかしい💦"
+      ];
+      const randomIndex = Math.floor(Math.random() * messages.length);
+      document.getElementById('result').textContent = messages[randomIndex];
+    }
+  </script>
+
 </body>
 </html>
-
