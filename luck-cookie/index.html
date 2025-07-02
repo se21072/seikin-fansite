@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Roulette</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="wrapper"> 
+        <div id="game-container">
+            <h1>Cookie Roulette</h1>
+            <p>残り時間: <span id="timer">60</span>秒</p>
+            <p>クッキー: <span id="cookie-count">0</span>個</p>
+            <p>運ポイント: <span id="luck-point-count">0</span> / 70</p>
+            <button id="click-button">クッキーを焼く！</button>
+
+            <div class="gamble-section">
+                <h2>クッキーギャンブル</h2>
+                <p>現在のクッキーを賭ける量を設定:</p>
+                <input type="range" id="gamble-amount-slider" min="0" max="100" value="0">
+                <p><span id="gamble-amount-display">0</span> 個を賭けます (<span id="gamble-percentage-display">0</span>%)</p>
+
+                <p>運ポイントを消費して成功確率UP！</p>
+                <input type="range" id="luck-point-consumption-slider" min="0" max="70" value="0">
+                <p><span id="luck-point-consumption-display">0</span> ポイント消費</p>
+
+                <p class="predicted-rate">現在の成功確率: <span id="predicted-success-rate">50</span>%</p>
+
+                <button id="gamble-button">この条件でギャンブル！</button>
+                <p id="gamble-result"></p>
+            </div>
+
+            <div id="game-over-screen" style="display: none;">
+                <h2>ゲーム終了！</h2>
+                <p>あなたの最終クッキー数: <span id="final-cookie-count"></span>個</p>
+                <button id="restart-button">もう一度遊ぶ</button>
+            </div>
+        </div>
+
+        <div class="ranking-section">
+            <h3>最高クッキーランキング</h3>
+            <ul id="high-scores-list">
+                </ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

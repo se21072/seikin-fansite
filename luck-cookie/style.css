@@ -1,0 +1,321 @@
+body {
+	font-family: 'Arial', sans-serif;
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	/* 上揃えに変更 */
+	min-height: 100vh;
+	background-color: #f0f8ff;
+	margin: 0;
+	padding: 20px;
+	/* 全体に余白を追加 */
+	box-sizing: border-box;
+	/* パディングを幅に含める */
+}
+
+/* 全体を囲むラッパー */
+#wrapper {
+	display: flex;
+	/* Flexboxを適用 */
+	gap: 20px;
+	/* アイテム間の隙間 */
+	align-items: flex-start;
+	/* 上揃え */
+	max-width: 1200px;
+	/* 全体の最大幅を設定 */
+	width: 100%;
+	/* 幅を100%に */
+}
+
+#game-container {
+	background-color: #fff;
+	border-radius: 10px;
+	padding: 30px;
+	box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+	text-align: center;
+	width: 65%;
+	/* ゲーム本体が占める幅 */
+	max-width: 600px;
+	/* ゲーム本体の最大幅 */
+	position: relative;
+	/* ゲームオーバー画面の位置決めの基準 */
+}
+
+h1 {
+	color: #8b4513;
+	/* 茶色 */
+}
+
+p {
+	font-size: 1.2em;
+	margin: 10px 0;
+}
+
+button {
+	background-color: #d2b48c;
+	/* 薄い茶色 */
+	color: white;
+	border: none;
+	padding: 15px 25px;
+	font-size: 1.1em;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+	margin-top: 15px;
+}
+
+button:hover {
+	background-color: #b8860b;
+	/* ゴールド */
+}
+
+#click-button {
+	background-color: #ff6347;
+	/* トマト色 */
+}
+
+#click-button:hover {
+	background-color: #e65c00;
+	/* ダークオレンジ */
+}
+
+.gamble-section {
+	margin-top: 30px;
+	border-top: 1px solid #eee;
+	padding-top: 20px;
+}
+
+#gamble-button {
+	background-color: #4682b4;
+	/* スチールブルー */
+}
+
+#gamble-button:hover {
+	background-color: #36648b;
+	/* ダークスチールブルー */
+}
+
+/* ギャンブルセクションのスライダー */
+.gamble-section input[type="range"] {
+	width: 80%;
+	margin: 10px auto;
+	display: block;
+	-webkit-appearance: none;
+	/* デフォルトのスタイルを無効化 */
+	appearance: none;
+	height: 8px;
+	background: #ddd;
+	border-radius: 5px;
+	outline: none;
+}
+
+.gamble-section input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 20px;
+	height: 20px;
+	background: #4682b4;
+	/* スチールブルー */
+	border-radius: 50%;
+	cursor: pointer;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.gamble-section input[type="range"]::-moz-range-thumb {
+	width: 20px;
+	height: 20px;
+	background: #4682b4;
+	/* スチールブルー */
+	border-radius: 50%;
+	cursor: pointer;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.predicted-rate {
+	font-size: 1.8em;
+	/* 予想成功確率を大きく表示 */
+	font-weight: bold;
+	color: #ff6347;
+	/* 目立つ色に */
+	margin: 20px 0;
+}
+
+/* ギャンブル成功時のフラッシュアニメーション */
+@keyframes success-flash {
+	0% {
+		background-color: #f0f8ff;
+	}
+
+	25% {
+		background-color: #ffd700;
+	}
+
+	/* ゴールド */
+	50% {
+		background-color: #f0f8ff;
+	}
+
+	75% {
+		background-color: #ffd700;
+	}
+
+	100% {
+		background-color: #f0f8ff;
+	}
+}
+
+.gamble-success-flash {
+	animation: success-flash 0.5s ease-out;
+}
+
+/* クッキーカウントのアニメーション */
+@keyframes cookie-pop {
+	0% {
+		transform: scale(1);
+	}
+
+	50% {
+		transform: scale(1.2);
+		color: #ff4500;
+	}
+
+	/* オレンジレッド */
+	100% {
+		transform: scale(1);
+	}
+}
+
+#cookie-count.pop {
+	animation: cookie-pop 0.3s ease-out;
+}
+
+/* ギャンブル結果メッセージのスタイル強化 */
+#gamble-result.success {
+	color: #ff4500;
+	/* オレンジレッド */
+	font-weight: bold;
+	font-size: 1.5em;
+	animation: fadeInOut 1s forwards;
+	/* フェードイン・アウト */
+}
+
+@keyframes fadeInOut {
+	0% {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+
+	20% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	80% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	100% {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+}
+
+/* ゲームオーバー画面 */
+#game-over-screen {
+	background-color: rgba(255, 255, 255, 0.95);
+	/* 透明度を少し下げ、背景をより見えにくく */
+	position: absolute;
+	/* 親要素（game-container）を基準に配置 */
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	font-size: 1.5em;
+	color: #333;
+	z-index: 10;
+	/* ランキングの上に表示されるようにする */
+	border-radius: 10px;
+	/* game-containerに合わせて角を丸く */
+}
+
+/* ランキングセクションのスタイル */
+.ranking-section {
+	background-color: #fff;
+	border-radius: 10px;
+	padding: 20px;
+	box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+	width: 35%;
+	/* ランキングが占める幅 */
+	max-width: 400px;
+	/* ランキングの最大幅 */
+	text-align: center;
+}
+
+.ranking-section h3 {
+	color: #8b4513;
+	margin-bottom: 15px;
+}
+
+#high-scores-list {
+	list-style: none;
+	/* リストの点を削除 */
+	padding: 0;
+	margin: 0 auto;
+}
+
+#high-scores-list li {
+	background-color: #f9f9f9;
+	padding: 8px 15px;
+	margin-bottom: 5px;
+	border-radius: 5px;
+	display: flex;
+	justify-content: space-between;
+	font-size: 1.1em;
+}
+
+#high-scores-list li:nth-child(1) {
+	/* 1位のスタイル */
+	background-color: #ffd700;
+	/* ゴールド */
+	font-weight: bold;
+}
+
+#high-scores-list li:nth-child(2) {
+	/* 2位のスタイル */
+	background-color: #c0c0c0;
+	/* シルバー */
+}
+
+#high-scores-list li:nth-child(3) {
+	/* 3位のスタイル */
+	background-color: #cd7f32;
+	/* ブロンズ */
+}
+
+/* レスポンシブ対応 (画面が狭い場合は縦並びにする) */
+@media (max-width: 768px) {
+	#wrapper {
+		flex-direction: column;
+		/* 縦並びにする */
+		align-items: center;
+		/* 中央揃え */
+	}
+
+	#game-container,
+	.ranking-section {
+		width: 100%;
+		/* 幅を100%にする */
+		max-width: 500px;
+		/* 最大幅を調整 */
+	}
+
+	.ranking-section {
+		margin-top: 20px;
+		/* 上部に余白 */
+	}
+}
