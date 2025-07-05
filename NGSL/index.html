@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>軽量版英単語学習アプリ</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #f5f5f5;
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+      }
+
+      .stats {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 5px;
+      }
+
+      .stat-item {
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 2em;
+        font-weight: bold;
+        color: #007bff;
+      }
+
+      .controls {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        margin: 0 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: opacity 0.2s;
+      }
+
+      .btn-primary {
+        background: #007bff;
+        color: white;
+      }
+
+      .btn-secondary {
+        background: #6c757d;
+        color: white;
+      }
+
+      .btn-success {
+        background: #28a745;
+        color: white;
+      }
+
+      .btn:hover {
+        opacity: 0.8;
+      }
+
+      .btn.active {
+        background: #0056b3;
+      }
+
+      .file-upload {
+        margin-bottom: 30px;
+        padding: 20px;
+        border: 2px dashed #ccc;
+        border-radius: 5px;
+        text-align: center;
+      }
+
+      .loading-message {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        margin-bottom: 20px;
+      }
+
+      .word-card {
+        text-align: center;
+        padding: 30px;
+        border: 1px solid #eee;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+
+      .word-display {
+        font-size: 3em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+      }
+
+      .word-info {
+        font-size: 1.1em;
+        color: #666;
+        margin-bottom: 20px;
+      }
+
+      .meaning,
+      .example {
+        font-size: 1.2em;
+        margin: 15px 0;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 5px;
+      }
+
+      .example {
+        font-style: italic;
+        color: #555;
+      }
+
+      .quiz-options {
+        margin: 20px 0;
+      }
+
+      .quiz-option {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        cursor: pointer;
+        background: white;
+        font-size: 16px;
+      }
+
+      .quiz-option:hover {
+        background: #f8f9fa;
+      }
+
+      .quiz-option.selected {
+        background: #e3f2fd;
+        border-color: #007bff;
+      }
+
+      .quiz-option.correct {
+        background: #d4edda;
+        border-color: #28a745;
+      }
+
+      .quiz-option.incorrect {
+        background: #f8d7da;
+        border-color: #dc3545;
+      }
+
+      .progress {
+        width: 100%;
+        height: 20px;
+        background: #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: #007bff;
+        transition: width 0.3s;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      /* 問題状態表示のスタイル */
+      .word-list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 0 10px;
+      }
+
+      .word-list-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .filter-buttons {
+        display: flex;
+        gap: 5px;
+      }
+
+      .filter-btn {
+        padding: 5px 10px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        background: white;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s;
+      }
+
+      .filter-btn:hover {
+        background: #f8f9fa;
+      }
+
+      .filter-btn.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+      }
+
+      .word-list {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #eee;
+        border-radius: 5px;
+        padding: 10px;
+        margin-top: 10px;
+      }
+
+      .word-item {
+        padding: 12px;
+        cursor: pointer;
+        border-radius: 3px;
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-left: 4px solid transparent;
+      }
+
+      .word-item:hover {
+        background: #f8f9fa;
+      }
+
+      .word-item.active {
+        background: #007bff;
+        color: white;
+        border-left-color: #0056b3;
+      }
+
+      .word-item.solved {
+        background: #d4edda;
+        border-left-color: #28a745;
+      }
+
+      .word-item.active.solved {
+        background: #218838;
+        color: white;
+      }
+
+      .word-item.incorrect {
+        background: #f8d7da;
+        border-left-color: #dc3545;
+      }
+
+      .word-item.active.incorrect {
+        background: #c82333;
+        color: white;
+      }
+
+      .word-info-left {
+        flex: 1;
+        text-align: left;
+      }
+
+      .word-status {
+        font-size: 0.9em;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: bold;
+        white-space: nowrap;
+      }
+
+      .status-unsolved {
+        background: #e9ecef;
+        color: #6c757d;
+      }
+
+      .status-correct {
+        background: #28a745;
+        color: white;
+      }
+
+      .status-incorrect {
+        background: #dc3545;
+        color: white;
+      }
+
+      .word-item.active .word-status {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+      }
+
+      .legend {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 5px;
+        font-size: 0.9em;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+      }
+
+      .legend-unsolved {
+        background: #e9ecef;
+      }
+      .legend-correct {
+        background: #28a745;
+      }
+      .legend-incorrect {
+        background: #dc3545;
+      }
+
+      @media (max-width: 600px) {
+        .stats {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .btn {
+          display: block;
+          margin: 5px 0;
+        }
+
+        .word-list-header {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .legend {
+          flex-direction: column;
+          gap: 5px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📚 軽量版英単語学習アプリ</h1>
+
+      <div class="file-upload">
+        <p>
+          CSVファイルをアップロード (Lemma, SFI Rank, SFI, Frequency, 意味,
+          例文)
+        </p>
+        <input type="file" id="csvFile" accept=".csv" />
+        <div id="loadingMessage" class="loading-message hidden">
+          gee.csvを読み込み中...
+        </div>
+        <div style="margin-top: 10px; font-size: 0.9em; color: #666">
+          💡
+          <strong>ヒント:</strong>
+          gee.csvが自動読み込みされない場合は、上記のファイル選択機能を使用してください。<br />
+          <span id="localHint"
+            >または、<code>python -m http.server 8000</code>
+            でローカルサーバーを起動して
+            <code>http://localhost:8000</code> でアクセスしてください。</span
+          >
+          <span id="githubHint" style="display: none"
+            >GitHub Pagesでは通常自動読み込みが正常に動作します。</span
+          >
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-value" id="totalWords">0</div>
+          <div>総単語数</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="correctAnswers">0</div>
+          <div>正解数</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="accuracy">0%</div>
+          <div>正答率</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="unsolvedCount">0</div>
+          <div>未解答</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-primary active" id="flashcardMode">
+          フラッシュカード
+        </button>
+        <button class="btn btn-secondary" id="quizMode">クイズ</button>
+        <button class="btn btn-success" id="showUnsolvedBtn">
+          未解答の問題
+        </button>
+        <button class="btn btn-secondary" id="resetProgressBtn">
+          進捗リセット
+        </button>
+      </div>
+
+      <div class="progress">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div class="word-card">
+        <div id="flashcardContent">
+          <div class="word-display" id="wordDisplay">読み込み中...</div>
+          <div class="word-info" id="wordInfo">
+            CSVファイルを読み込んでいます
+          </div>
+          <div class="meaning hidden" id="meaningDisplay"></div>
+          <div class="example hidden" id="exampleDisplay"></div>
+          <div>
+            <button class="btn btn-primary" id="showAnswerBtn">
+              答えを表示
+            </button>
+            <button class="btn btn-secondary" id="nextWordBtn">次の単語</button>
+          </div>
+        </div>
+
+        <div id="quizContent" class="hidden">
+          <div class="word-display" id="quizWord">読み込み中...</div>
+          <div class="word-info" id="quizInfo">
+            CSVファイルを読み込んでいます
+          </div>
+          <div class="quiz-options" id="quizOptions"></div>
+          <div>
+            <button class="btn btn-primary" id="submitAnswerBtn">
+              回答する
+            </button>
+            <button class="btn btn-secondary" id="nextQuizBtn">次の問題</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="word-list-header">
+        <div class="word-list-title">単語一覧</div>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-filter="all">すべて</button>
+          <button class="filter-btn" data-filter="unsolved">未解答</button>
+          <button class="filter-btn" data-filter="correct">正解</button>
+          <button class="filter-btn" data-filter="incorrect">不正解</button>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color legend-unsolved"></div>
+          <span>未解答</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color legend-correct"></div>
+          <span>正解</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color legend-incorrect"></div>
+          <span>不正解</span>
+        </div>
+      </div>
+
+      <div class="word-list" id="wordList"></div>
+    </div>
+
+    <script>
+      // アプリケーションの状態
+      let state = {
+        words: [],
+        currentIndex: 0,
+        mode: "flashcard",
+        showAnswer: false,
+        correctAnswers: 0,
+        totalAnswers: 0,
+        wordResults: new Map(), // 各単語の結果を保存 (index -> 'correct'/'incorrect')
+        selectedOption: null,
+        isLoading: true,
+        currentFilter: "all",
+      };
+
+      // ローカルストレージのキー
+      const STORAGE_KEY = "vocab_app_state";
+
+      // サンプルデータ（フォールバック用）
+      const sampleWords = [
+        {
+          lemma: "the",
+          sfiRank: 1,
+          sfi: 87.85,
+          frequency: 60910,
+          meaning: "(定冠詞) 特定のものを指す時に使う。",
+          example: "The sun rises in the east.",
+        },
+        {
+          lemma: "be",
+          sfiRank: 2,
+          sfi: 83.21,
+          frequency: 45678,
+          meaning: "(動詞) ～である、～にいる",
+          example: "She is a teacher.",
+        },
+        {
+          lemma: "have",
+          sfiRank: 3,
+          sfi: 78.45,
+          frequency: 38901,
+          meaning: "(動詞) 持っている、食べる",
+          example: "I have a car.",
+        },
+        {
+          lemma: "do",
+          sfiRank: 4,
+          sfi: 75.32,
+          frequency: 34567,
+          meaning: "(動詞) する、行う",
+          example: "What do you do?",
+        },
+        {
+          lemma: "say",
+          sfiRank: 5,
+          sfi: 71.89,
+          frequency: 29876,
+          meaning: "(動詞) 言う、述べる",
+          example: "She says hello.",
+        },
+        {
+          lemma: "get",
+          sfiRank: 6,
+          sfi: 68.76,
+          frequency: 26543,
+          meaning: "(動詞) 得る、手に入れる",
+          example: "I get up early.",
+        },
+        {
+          lemma: "make",
+          sfiRank: 7,
+          sfi: 65.43,
+          frequency: 23210,
+          meaning: "(動詞) 作る、製造する",
+          example: "Let's make a cake.",
+        },
+        {
+          lemma: "go",
+          sfiRank: 8,
+          sfi: 62.18,
+          frequency: 20987,
+          meaning: "(動詞) 行く、進む",
+          example: "I go to school.",
+        },
+      ];
+
+      // 初期化
+      function init() {
+        setupEvents();
+        loadSavedState();
+
+        // 環境に応じてヒント表示を切り替え
+        const isGitHubPages =
+          window.location.hostname.includes("github.io") ||
+          window.location.hostname.includes("github.com");
+
+        if (isGitHubPages) {
+          document.getElementById("localHint").style.display = "none";
+          document.getElementById("githubHint").style.display = "inline";
+        }
+
+        // ページ読み込み完了後にCSVファイルを自動読み込み
+        loadCSVFile();
+      }
+
+      // 保存された状態を読み込み
+      function loadSavedState() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            const savedState = JSON.parse(saved);
+
+            // 進捗データのみ復元
+            state.currentIndex = savedState.currentIndex || 0;
+            state.mode = savedState.mode || "flashcard";
+            state.correctAnswers = savedState.correctAnswers || 0;
+            state.totalAnswers = savedState.totalAnswers || 0;
+            state.wordResults = new Map(savedState.wordResults || []);
+            state.currentFilter = savedState.currentFilter || "all";
+
+            console.log("保存された進捗を復元しました");
+          }
+        } catch (error) {
+          console.error("保存データの読み込みに失敗:", error);
+        }
+      }
+
+      // 状態を保存
+      function saveState() {
+        try {
+          const stateToSave = {
+            currentIndex: state.currentIndex,
+            mode: state.mode,
+            correctAnswers: state.correctAnswers,
+            totalAnswers: state.totalAnswers,
+            wordResults: Array.from(state.wordResults.entries()),
+            currentFilter: state.currentFilter,
+            timestamp: new Date().toISOString(),
+          };
+
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+        } catch (error) {
+          console.error("状態の保存に失敗:", error);
+        }
+      }
+
+      // gee.csvを自動読み込み
+      async function loadCSVFile() {
+        try {
+          document.getElementById("loadingMessage").classList.remove("hidden");
+          document.getElementById("loadingMessage").textContent =
+            "gee.csvを読み込み中...";
+          document.getElementById("loadingMessage").style.color = "#007bff";
+
+          let csvText = null;
+
+          // GitHub Pagesではfetchが正常に動作するため、まずfetchを試行
+          try {
+            const response = await fetch("gee.csv");
+            if (response.ok) {
+              csvText = await response.text();
+              console.log("CSV読み込み完了:", csvText.length, "バイト");
+            } else {
+              throw new Error(
+                `CSVファイルの読み込みに失敗 (ステータス: ${response.status})`
+              );
+            }
+          } catch (fetchError) {
+            console.log(
+              "fetchが失敗、XMLHttpRequestを試行:",
+              fetchError.message
+            );
+
+            // XMLHttpRequestによる代替方法（ローカル環境用）
+            try {
+              csvText = await loadCSVWithXHR();
+            } catch (xhrError) {
+              console.error("XMLHttpRequestも失敗:", xhrError.message);
+              throw new Error("CSVファイルを読み込めませんでした");
+            }
+          }
+
+          if (!csvText) {
+            throw new Error("CSVファイルを読み込めませんでした");
+          }
+
+          const words = parseCSV(csvText);
+          console.log("解析完了:", words.length, "個の単語");
+
+          if (words.length > 0) {
+            state.words = words;
+            state.isLoading = false;
+
+            // 保存された進捗に基づいて表示を更新
+            updateDisplay();
+            updateStats();
+            updateWordList();
+            setFilter(state.currentFilter);
+
+            document.getElementById(
+              "loadingMessage"
+            ).textContent = `✅ gee.csvから${words.length}個の単語を読み込みました！`;
+            document.getElementById("loadingMessage").style.color = "#28a745";
+
+            setTimeout(() => {
+              document.getElementById("loadingMessage").classList.add("hidden");
+            }, 3000);
+          } else {
+            throw new Error("有効な単語データが見つかりません");
+          }
+        } catch (error) {
+          console.error("CSV読み込みエラー:", error);
+
+          // フォールバック：サンプルデータを使用
+          state.words = sampleWords;
+          state.isLoading = false;
+
+          // 保存された進捗に基づいて表示を更新
+          updateDisplay();
+          updateStats();
+          updateWordList();
+          setFilter(state.currentFilter);
+
+          // GitHub Pagesかローカル環境かを判定してメッセージを変更
+          const isGitHubPages = window.location.hostname.includes("github.io");
+          const message = isGitHubPages
+            ? `⚠️ gee.csvファイルが見つかりません<br>
+               <small style="color: #666;">
+               リポジトリにgee.csvファイルがアップロードされているか確認してください。
+               </small>`
+            : `⚠️ gee.csvが見つからないため、サンプルデータを使用しています<br>
+               <small style="color: #666;">
+               ローカルファイルの制限により読み込めない場合があります。<br>
+               ファイルアップロード機能を使用するか、ローカルサーバーで実行してください。
+               </small>`;
+
+          document.getElementById("loadingMessage").innerHTML = message;
+          document.getElementById("loadingMessage").style.color = "#dc3545";
+
+          setTimeout(() => {
+            document.getElementById("loadingMessage").classList.add("hidden");
+          }, 8000);
+        }
+      }
+
+      // XMLHttpRequestによるCSV読み込み（代替方法）
+      function loadCSVWithXHR() {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("GET", "gee.csv", true);
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+              if (xhr.status === 200) {
+                console.log(
+                  "XMLHttpRequest成功: CSV読み込み完了:",
+                  xhr.responseText.length,
+                  "バイト"
+                );
+                resolve(xhr.responseText);
+              } else {
+                reject(
+                  new Error(`XMLHttpRequest失敗 (ステータス: ${xhr.status})`)
+                );
+              }
+            }
+          };
+          xhr.onerror = function () {
+            reject(
+              new Error("XMLHttpRequestでネットワークエラーが発生しました")
+            );
+          };
+          xhr.send();
+        });
+      }
+
+      // イベントリスナー設定
+      function setupEvents() {
+        document.getElementById("flashcardMode").onclick = () =>
+          switchMode("flashcard");
+        document.getElementById("quizMode").onclick = () => switchMode("quiz");
+        document.getElementById("showAnswerBtn").onclick = showAnswer;
+        document.getElementById("nextWordBtn").onclick = nextWord;
+        document.getElementById("submitAnswerBtn").onclick = submitAnswer;
+        document.getElementById("nextQuizBtn").onclick = nextQuiz;
+        document.getElementById("csvFile").onchange = handleFileUpload;
+        document.getElementById("resetProgressBtn").onclick = resetProgress;
+        document.getElementById("showUnsolvedBtn").onclick = showUnsolved;
+
+        // フィルターボタンのイベント
+        document.querySelectorAll(".filter-btn").forEach((btn) => {
+          btn.onclick = () => setFilter(btn.dataset.filter);
+        });
+      }
+
+      // 未解答の問題を表示
+      function showUnsolved() {
+        if (state.isLoading) return;
+
+        const unsolvedIndices = [];
+        for (let i = 0; i < state.words.length; i++) {
+          if (!state.wordResults.has(i)) {
+            unsolvedIndices.push(i);
+          }
+        }
+
+        if (unsolvedIndices.length === 0) {
+          alert("すべての問題が解答済みです！");
+          return;
+        }
+
+        // 最初の未解答問題に移動
+        state.currentIndex = unsolvedIndices[0];
+        state.showAnswer = false;
+        state.selectedOption = null;
+
+        // クイズモードに切り替え
+        switchMode("quiz");
+
+        // フィルターを未解答に設定
+        setFilter("unsolved");
+
+        alert(
+          `${unsolvedIndices.length}個の未解答問題があります。最初の問題に移動しました。`
+        );
+      }
+
+      // フィルター設定
+      function setFilter(filter) {
+        state.currentFilter = filter;
+
+        // フィルターボタンのスタイル更新
+        document.querySelectorAll(".filter-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.filter === filter);
+        });
+
+        updateWordList();
+        saveState();
+      }
+
+      // 進捗リセット
+      function resetProgress() {
+        if (confirm("学習進捗をリセットしますか？この操作は元に戻せません。")) {
+          state.currentIndex = 0;
+          state.correctAnswers = 0;
+          state.totalAnswers = 0;
+          state.wordResults.clear();
+          state.showAnswer = false;
+          state.selectedOption = null;
+          state.currentFilter = "all";
+
+          updateDisplay();
+          updateStats();
+          updateWordList();
+          setFilter("all");
+          saveState();
+
+          alert("進捗がリセットされました。");
+        }
+      }
+
+      // モード切り替え
+      function switchMode(mode) {
+        if (state.isLoading) return;
+
+        state.mode = mode;
+
+        // ボタンスタイル更新
+        document.getElementById("flashcardMode").className =
+          "btn btn-primary" + (mode === "flashcard" ? " active" : "");
+        document.getElementById("quizMode").className =
+          "btn btn-secondary" + (mode === "quiz" ? " active" : "");
+
+        // コンテンツ表示切り替え
+        document.getElementById("flashcardContent").className =
+          mode === "flashcard" ? "" : "hidden";
+        document.getElementById("quizContent").className =
+          mode === "quiz" ? "" : "hidden";
+
+        updateDisplay();
+        saveState();
+      }
+
+      // 表示更新
+      function updateDisplay() {
+        if (state.isLoading || state.words.length === 0) return;
+
+        const word = state.words[state.currentIndex];
+        if (!word) return;
+
+        if (state.mode === "flashcard") {
+          document.getElementById("wordDisplay").textContent = word.lemma;
+          document.getElementById(
+            "wordInfo"
+          ).textContent = `SFI Rank: ${word.sfiRank} | Frequency: ${word.frequency}`;
+          document.getElementById("meaningDisplay").textContent = word.meaning;
+          document.getElementById("exampleDisplay").textContent = word.example;
+
+          document.getElementById("meaningDisplay").className = state.showAnswer
+            ? "meaning"
+            : "meaning hidden";
+          document.getElementById("exampleDisplay").className = state.showAnswer
+            ? "example"
+            : "example hidden";
+        } else {
+          document.getElementById("quizWord").textContent = word.lemma;
+          document.getElementById(
+            "quizInfo"
+          ).textContent = `SFI Rank: ${word.sfiRank}`;
+          generateQuizOptions(word);
+        }
+
+        updateProgress();
+      }
+
+      // 進捗更新
+      function updateProgress() {
+        const progress = ((state.currentIndex + 1) / state.words.length) * 100;
+        document.getElementById("progressBar").style.width = progress + "%";
+      }
+
+      // 答え表示
+      function showAnswer() {
+        if (state.isLoading) return;
+
+        state.showAnswer = true;
+        document.getElementById("meaningDisplay").className = "meaning";
+        document.getElementById("exampleDisplay").className = "example";
+      }
+
+      // 次の単語
+      function nextWord() {
+        if (state.isLoading) return;
+
+        state.currentIndex = (state.currentIndex + 1) % state.words.length;
+        state.showAnswer = false;
+
+        const word = state.words[state.currentIndex];
+        document.getElementById("wordDisplay").textContent = word.lemma;
+        document.getElementById(
+          "wordInfo"
+        ).textContent = `SFI Rank: ${word.sfiRank} | Frequency: ${word.frequency}`;
+        document.getElementById("meaningDisplay").textContent = word.meaning;
+        document.getElementById("exampleDisplay").textContent = word.example;
+        document.getElementById("meaningDisplay").className = "meaning hidden";
+        document.getElementById("exampleDisplay").className = "example hidden";
+
+        updateProgress();
+        updateWordListItem(state.currentIndex);
+        saveState();
+      }
+
+      // クイズ選択肢生成
+      function generateQuizOptions(correctWord) {
+        const options = [correctWord.meaning];
+        const usedIndices = new Set([state.currentIndex]);
+
+        while (options.length < 4 && usedIndices.size < state.words.length) {
+          const randomIndex = Math.floor(Math.random() * state.words.length);
+          if (!usedIndices.has(randomIndex)) {
+            usedIndices.add(randomIndex);
+            options.push(state.words[randomIndex].meaning);
+          }
+        }
+
+        for (let i = options.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [options[i], options[j]] = [options[j], options[i]];
+        }
+
+        const container = document.getElementById("quizOptions");
+        const existingButtons = container.querySelectorAll(".quiz-option");
+
+        options.forEach((option, index) => {
+          let button = existingButtons[index];
+          if (!button) {
+            button = document.createElement("button");
+            button.className = "quiz-option";
+            button.onclick = () => selectOption(index, option);
+            container.appendChild(button);
+          }
+          button.textContent = option;
+          button.className = "quiz-option";
+          button.onclick = () => selectOption(index, option);
+        });
+
+        for (let i = options.length; i < existingButtons.length; i++) {
+          existingButtons[i].remove();
+        }
+      }
+
+      // 選択肢選択
+      function selectOption(index, option) {
+        if (state.isLoading) return;
+
+        document
+          .querySelectorAll(".quiz-option")
+          .forEach((opt) => opt.classList.remove("selected"));
+        document
+          .querySelectorAll(".quiz-option")
+          [index].classList.add("selected");
+        state.selectedOption = option;
+      }
+
+      // 回答提出
+      function submitAnswer() {
+        if (state.isLoading || !state.selectedOption) return;
+
+        const word = state.words[state.currentIndex];
+        const isCorrect = state.selectedOption === word.meaning;
+
+        document.querySelectorAll(".quiz-option").forEach((opt) => {
+          if (opt.textContent === word.meaning) {
+            opt.classList.add("correct");
+          } else if (opt.textContent === state.selectedOption && !isCorrect) {
+            opt.classList.add("incorrect");
+          }
+        });
+
+        state.totalAnswers++;
+        if (isCorrect) {
+          state.correctAnswers++;
+          state.wordResults.set(state.currentIndex, "correct");
+        } else {
+          state.wordResults.set(state.currentIndex, "incorrect");
+        }
+
+        updateStats();
+        updateWordList();
+        saveState();
+      }
+
+      // 次のクイズ
+      function nextQuiz() {
+        if (state.isLoading) return;
+
+        state.currentIndex = (state.currentIndex + 1) % state.words.length;
+        state.selectedOption = null;
+
+        const options = document.querySelectorAll(".quiz-option");
+        options.forEach((opt) => (opt.className = "quiz-option"));
+
+        const word = state.words[state.currentIndex];
+        document.getElementById("quizWord").textContent = word.lemma;
+        document.getElementById(
+          "quizInfo"
+        ).textContent = `SFI Rank: ${word.sfiRank}`;
+        generateQuizOptions(word);
+
+        updateProgress();
+        updateWordListItem(state.currentIndex);
+        saveState();
+      }
+
+      // 統計更新
+      function updateStats() {
+        document.getElementById("totalWords").textContent = state.words.length;
+        document.getElementById("correctAnswers").textContent =
+          state.correctAnswers;
+
+        const unsolvedCount = state.words.length - state.wordResults.size;
+        document.getElementById("unsolvedCount").textContent = unsolvedCount;
+
+        const accuracy =
+          state.totalAnswers > 0
+            ? Math.round((state.correctAnswers / state.totalAnswers) * 100)
+            : 0;
+        document.getElementById("accuracy").textContent = accuracy + "%";
+      }
+
+      // 単語リストの個別アイテム更新
+      function updateWordListItem(index) {
+        const items = document.querySelectorAll(".word-item");
+        items.forEach((item, i) => {
+          if (i === index) {
+            item.classList.add("active");
+          } else {
+            item.classList.remove("active");
+          }
+        });
+      }
+
+      // 単語リスト更新
+      function updateWordList() {
+        const list = document.getElementById("wordList");
+        list.innerHTML = "";
+
+        state.words.forEach((word, index) => {
+          const result = state.wordResults.get(index);
+
+          // フィルター適用
+          if (state.currentFilter === "unsolved" && result) return;
+          if (state.currentFilter === "correct" && result !== "correct") return;
+          if (state.currentFilter === "incorrect" && result !== "incorrect")
+            return;
+
+          const item = document.createElement("div");
+          item.className = "word-item";
+
+          // 状態に応じてクラスを追加
+          if (index === state.currentIndex) item.classList.add("active");
+          if (result === "correct") item.classList.add("solved");
+          if (result === "incorrect") item.classList.add("incorrect");
+
+          // HTML構造を作成
+          item.innerHTML = `
+                    <div class="word-info-left">
+                        <strong>${word.lemma}</strong><br>
+                        <small>Rank: ${word.sfiRank}</small>
+                    </div>
+                    <div class="word-status ${getStatusClass(result)}">
+                        ${getStatusText(result)}
+                    </div>
+                `;
+
+          item.onclick = () => {
+            if (state.isLoading) return;
+            state.currentIndex = index;
+            state.showAnswer = false;
+            state.selectedOption = null;
+            updateDisplay();
+            updateWordListItem(index);
+            saveState();
+          };
+
+          list.appendChild(item);
+        });
+      }
+
+      // 状態に応じたクラス名を取得
+      function getStatusClass(result) {
+        if (!result) return "status-unsolved";
+        if (result === "correct") return "status-correct";
+        if (result === "incorrect") return "status-incorrect";
+        return "status-unsolved";
+      }
+
+      // 状態に応じたテキストを取得
+      function getStatusText(result) {
+        if (!result) return "未解答";
+        if (result === "correct") return "正解";
+        if (result === "incorrect") return "不正解";
+        return "未解答";
+      }
+
+      // CSVファイル処理
+      function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const words = parseCSV(e.target.result);
+          if (words.length > 0) {
+            // 新しいCSVファイルを読み込む時は進捗をリセット
+            state.words = words;
+            state.currentIndex = 0;
+            state.showAnswer = false;
+            state.correctAnswers = 0;
+            state.totalAnswers = 0;
+            state.wordResults.clear();
+            state.isLoading = false;
+            state.currentFilter = "all";
+
+            updateDisplay();
+            updateStats();
+            updateWordList();
+            setFilter("all");
+            saveState();
+
+            alert(words.length + "個の単語を読み込みました！");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // CSV解析
+      function parseCSV(csv) {
+        const lines = csv.split("\n");
+        const words = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+
+          const cols = line.split(",");
+          if (cols.length >= 6) {
+            words.push({
+              lemma: cols[0].replace(/"/g, ""),
+              sfiRank: parseInt(cols[1]) || 0,
+              sfi: parseFloat(cols[2]) || 0,
+              frequency: parseInt(cols[3]) || 0,
+              meaning: cols[4].replace(/"/g, ""),
+              example: cols[5].replace(/"/g, ""),
+            });
+          }
+        }
+
+        return words;
+      }
+
+      // 初期化実行
+      init();
+    </script>
+  </body>
+</html>
