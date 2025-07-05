@@ -428,6 +428,9 @@
         <button class="btn btn-success" id="showUnsolvedBtn">
           未解答の問題
         </button>
+        <button class="btn btn-secondary" id="shuffleBtn">
+          🔀 シャッフル
+        </button>
         <button class="btn btn-secondary" id="resetProgressBtn">
           進捗リセット
         </button>
@@ -509,6 +512,8 @@
         selectedOption: null,
         isLoading: true,
         currentFilter: "all",
+        shuffledIndices: [], // シャッフルされたインデックス配列
+        isShuffled: false, // シャッフル状態かどうか
       };
 
       // ローカルストレージのキー
@@ -615,6 +620,14 @@
             state.totalAnswers = savedState.totalAnswers || 0;
             state.wordResults = new Map(savedState.wordResults || []);
             state.currentFilter = savedState.currentFilter || "all";
+            state.isShuffled = savedState.isShuffled || false;
+            state.shuffledIndices = savedState.shuffledIndices || [];
+
+            // シャッフルボタンの表示を復元
+            if (state.isShuffled) {
+              document.getElementById("shuffleBtn").textContent = "🔄 元の順序";
+              document.getElementById("shuffleBtn").style.background = "#28a745";
+            }
 
             console.log("保存された進捗を復元しました");
           }
@@ -633,6 +646,8 @@
             totalAnswers: state.totalAnswers,
             wordResults: Array.from(state.wordResults.entries()),
             currentFilter: state.currentFilter,
+            isShuffled: state.isShuffled,
+            shuffledIndices: state.shuffledIndices,
             timestamp: new Date().toISOString(),
           };
 
@@ -783,6 +798,7 @@
         document.getElementById("csvFile").onchange = handleFileUpload;
         document.getElementById("resetProgressBtn").onclick = resetProgress;
         document.getElementById("showUnsolvedBtn").onclick = showUnsolved;
+        document.getElementById("shuffleBtn").onclick = shuffleWords;
 
         // フィルターボタンのイベント
         document.querySelectorAll(".filter-btn").forEach((btn) => {
@@ -835,8 +851,61 @@
         saveState();
       }
 
-      // 進捗リセット
-      function resetProgress() {
+      // シャッフル機能
+      function shuffleWords() {
+        if (state.isLoading || state.words.length === 0) return;
+
+        if (state.isShuffled) {
+          // シャッフル解除（元の順序に戻す）
+          state.isShuffled = false;
+          state.shuffledIndices = [];
+          state.currentIndex = 0;
+          
+          document.getElementById("shuffleBtn").textContent = "🔀 シャッフル";
+          document.getElementById("shuffleBtn").style.background = "#6c757d";
+          
+          alert("単語の順序を元に戻しました。");
+        } else {
+          // シャッフル実行
+          state.shuffledIndices = Array.from({length: state.words.length}, (_, i) => i);
+          
+          // Fisher-Yates シャッフルアルゴリズム
+          for (let i = state.shuffledIndices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [state.shuffledIndices[i], state.shuffledIndices[j]] = 
+            [state.shuffledIndices[j], state.shuffledIndices[i]];
+          }
+          
+          state.isShuffled = true;
+          state.currentIndex = 0;
+          
+          document.getElementById("shuffleBtn").textContent = "🔄 元の順序";
+          document.getElementById("shuffleBtn").style.background = "#28a745";
+          
+          alert(`${state.words.length}個の単語をシャッフルしました！`);
+        }
+
+        // 表示を更新
+        state.showAnswer = false;
+        state.selectedOption = null;
+        updateDisplay();
+        updateWordList();
+        saveState();
+      }
+
+      // 現在の実際のインデックスを取得（シャッフル対応）
+      function getCurrentWordIndex() {
+        if (state.isShuffled && state.shuffledIndices.length > 0) {
+          return state.shuffledIndices[state.currentIndex];
+        }
+        return state.currentIndex;
+      }
+
+      // 現在の単語を取得（シャッフル対応）
+      function getCurrentWord() {
+        const actualIndex = getCurrentWordIndex();
+        return state.words[actualIndex];
+      }
         if (confirm("学習進捗をリセットしますか？この操作は元に戻せません。")) {
           state.currentIndex = 0;
           state.correctAnswers = 0;
@@ -845,6 +914,12 @@
           state.showAnswer = false;
           state.selectedOption = null;
           state.currentFilter = "all";
+          state.isShuffled = false;
+          state.shuffledIndices = [];
+
+          // シャッフルボタンの表示を元に戻す
+          document.getElementById("shuffleBtn").textContent = "🔀 シャッフル";
+          document.getElementById("shuffleBtn").style.background = "#6c757d";
 
           updateDisplay();
           updateStats();
@@ -882,7 +957,7 @@
       function updateDisplay() {
         if (state.isLoading || state.words.length === 0) return;
 
-        const word = state.words[state.currentIndex];
+        const word = getCurrentWord();
         if (!word) return;
 
         if (state.mode === "flashcard") {
@@ -932,7 +1007,7 @@
         state.currentIndex = (state.currentIndex + 1) % state.words.length;
         state.showAnswer = false;
 
-        const word = state.words[state.currentIndex];
+        const word = getCurrentWord();
         document.getElementById("wordDisplay").textContent = word.lemma;
         document.getElementById(
           "wordInfo"
@@ -943,7 +1018,7 @@
         document.getElementById("exampleDisplay").className = "example hidden";
 
         updateProgress();
-        updateWordListItem(state.currentIndex);
+        updateWordListItem(getCurrentWordIndex());
         saveState();
       }
 
@@ -1003,7 +1078,8 @@
       function submitAnswer() {
         if (state.isLoading || !state.selectedOption) return;
 
-        const word = state.words[state.currentIndex];
+        const word = getCurrentWord();
+        const actualIndex = getCurrentWordIndex();
         const isCorrect = state.selectedOption === word.meaning;
 
         document.querySelectorAll(".quiz-option").forEach((opt) => {
@@ -1017,9 +1093,9 @@
         state.totalAnswers++;
         if (isCorrect) {
           state.correctAnswers++;
-          state.wordResults.set(state.currentIndex, "correct");
+          state.wordResults.set(actualIndex, "correct");
         } else {
-          state.wordResults.set(state.currentIndex, "incorrect");
+          state.wordResults.set(actualIndex, "incorrect");
         }
 
         updateStats();
@@ -1037,7 +1113,7 @@
         const options = document.querySelectorAll(".quiz-option");
         options.forEach((opt) => (opt.className = "quiz-option"));
 
-        const word = state.words[state.currentIndex];
+        const word = getCurrentWord();
         document.getElementById("quizWord").textContent = word.lemma;
         document.getElementById(
           "quizInfo"
@@ -1045,7 +1121,7 @@
         generateQuizOptions(word);
 
         updateProgress();
-        updateWordListItem(state.currentIndex);
+        updateWordListItem(getCurrentWordIndex());
         saveState();
       }
 
@@ -1066,10 +1142,10 @@
       }
 
       // 単語リストの個別アイテム更新
-      function updateWordListItem(index) {
+      function updateWordListItem(actualIndex) {
         const items = document.querySelectorAll(".word-item");
         items.forEach((item, i) => {
-          if (i === index) {
+          if (i === actualIndex) {
             item.classList.add("active");
           } else {
             item.classList.remove("active");
@@ -1112,7 +1188,14 @@
 
           item.onclick = () => {
             if (state.isLoading) return;
-            state.currentIndex = index;
+            
+            // シャッフル時は実際のインデックスから表示インデックスを逆算
+            if (state.isShuffled) {
+              state.currentIndex = state.shuffledIndices.indexOf(index);
+            } else {
+              state.currentIndex = index;
+            }
+            
             state.showAnswer = false;
             state.selectedOption = null;
             updateDisplay();
