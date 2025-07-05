@@ -82,6 +82,32 @@
         color: white;
       }
 
+      .bookmark-btn {
+        padding: 8px 16px;
+        margin: 5px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        background: #ffc107;
+        color: #212529;
+        transition: all 0.3s ease;
+      }
+
+      .bookmark-btn:hover {
+        background: #e0a800;
+        transform: translateY(-1px);
+      }
+
+      .bookmark-btn.bookmarked {
+        background: #fd7e14;
+        color: white;
+      }
+
+      .bookmark-btn.bookmarked:hover {
+        background: #e8690b;
+      }
+
       .btn:hover {
         opacity: 0.8;
       }
@@ -284,6 +310,26 @@
         color: white;
       }
 
+      .word-item.bookmarked {
+        border-left: 4px solid #ffc107;
+        background: #fff3cd;
+      }
+
+      .word-item.active.bookmarked {
+        background: #ffc107;
+        color: #212529;
+      }
+
+      .word-item.bookmarked::before {
+        content: "★ ";
+        color: #ffc107;
+        font-weight: bold;
+      }
+
+      .word-item.active.bookmarked::before {
+        color: #212529;
+      }
+
       .word-info-left {
         flex: 1;
         text-align: left;
@@ -428,9 +474,7 @@
         <button class="btn btn-success" id="showUnsolvedBtn">
           未解答の問題
         </button>
-        <button class="btn btn-secondary" id="shuffleBtn">
-          🔀 シャッフル
-        </button>
+        <button class="btn btn-secondary" id="shuffleBtn">🔀 シャッフル</button>
         <button class="btn btn-secondary" id="resetProgressBtn">
           進捗リセット
         </button>
@@ -453,6 +497,13 @@
               答えを表示
             </button>
             <button class="btn btn-secondary" id="nextWordBtn">次の単語</button>
+            <button
+              class="bookmark-btn"
+              id="bookmarkBtn"
+              onclick="toggleBookmark(getCurrentActualIndex())"
+            >
+              ☆ ブックマーク
+            </button>
           </div>
         </div>
 
@@ -467,6 +518,13 @@
               回答する
             </button>
             <button class="btn btn-secondary" id="nextQuizBtn">次の問題</button>
+            <button
+              class="bookmark-btn"
+              id="quizBookmarkBtn"
+              onclick="toggleBookmark(getCurrentActualIndex())"
+            >
+              ☆ ブックマーク
+            </button>
           </div>
         </div>
       </div>
@@ -478,6 +536,9 @@
           <button class="filter-btn" data-filter="unsolved">未解答</button>
           <button class="filter-btn" data-filter="correct">正解</button>
           <button class="filter-btn" data-filter="incorrect">不正解</button>
+          <button class="filter-btn" data-filter="bookmarked">
+            ブックマーク
+          </button>
         </div>
       </div>
 
@@ -514,10 +575,13 @@
         currentFilter: "all",
         shuffledIndices: [], // シャッフルされたインデックス配列
         isShuffled: false, // シャッフル状態かどうか
+        isShuffling: false, // シャッフル処理中フラグ
+        bookmarkedWords: new Set(), // ブックマークされた単語のインデックス
       };
 
       // ローカルストレージのキー
       const STORAGE_KEY = "vocab_app_state";
+      const BOOKMARK_STORAGE_KEY = "vocab_app_bookmarks";
 
       // サンプルデータ（フォールバック用）
       const sampleWords = [
@@ -626,7 +690,8 @@
             // シャッフルボタンの表示を復元
             if (state.isShuffled) {
               document.getElementById("shuffleBtn").textContent = "🔄 元の順序";
-              document.getElementById("shuffleBtn").style.background = "#28a745";
+              document.getElementById("shuffleBtn").style.background =
+                "#28a745";
             }
 
             console.log("保存された進捗を復元しました");
@@ -634,6 +699,9 @@
         } catch (error) {
           console.error("保存データの読み込みに失敗:", error);
         }
+
+        // ブックマークを読み込み
+        loadBookmarks();
       }
 
       // 状態を保存
@@ -654,6 +722,65 @@
           localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
         } catch (error) {
           console.error("状態の保存に失敗:", error);
+        }
+      }
+
+      // ブックマークを保存
+      function saveBookmarks() {
+        try {
+          const bookmarksArray = Array.from(state.bookmarkedWords);
+          localStorage.setItem(
+            BOOKMARK_STORAGE_KEY,
+            JSON.stringify(bookmarksArray)
+          );
+        } catch (error) {
+          console.error("ブックマークの保存に失敗:", error);
+        }
+      }
+
+      // ブックマークを読み込み
+      function loadBookmarks() {
+        try {
+          const saved = localStorage.getItem(BOOKMARK_STORAGE_KEY);
+          if (saved) {
+            const bookmarksArray = JSON.parse(saved);
+            state.bookmarkedWords = new Set(bookmarksArray);
+          }
+        } catch (error) {
+          console.error("ブックマークの読み込みに失敗:", error);
+          state.bookmarkedWords = new Set();
+        }
+      }
+
+      // ブックマークの切り替え
+      function toggleBookmark(index) {
+        if (state.bookmarkedWords.has(index)) {
+          state.bookmarkedWords.delete(index);
+        } else {
+          state.bookmarkedWords.add(index);
+        }
+        saveBookmarks();
+        updateBookmarkButton();
+        updateWordList(); // 単語リストのブックマーク表示を更新
+      }
+
+      // ブックマークボタンの表示を更新
+      function updateBookmarkButton() {
+        const currentActualIndex = getCurrentActualIndex();
+        const bookmarkBtn = document.getElementById("bookmarkBtn");
+        const quizBookmarkBtn = document.getElementById("quizBookmarkBtn");
+
+        const isBookmarked = state.bookmarkedWords.has(currentActualIndex);
+        const text = isBookmarked ? "★ ブックマーク済み" : "☆ ブックマーク";
+        const className = `bookmark-btn ${isBookmarked ? "bookmarked" : ""}`;
+
+        if (bookmarkBtn) {
+          bookmarkBtn.textContent = text;
+          bookmarkBtn.className = className;
+        }
+        if (quizBookmarkBtn) {
+          quizBookmarkBtn.textContent = text;
+          quizBookmarkBtn.className = className;
         }
       }
 
@@ -823,7 +950,14 @@
         }
 
         // 最初の未解答問題に移動
-        state.currentIndex = unsolvedIndices[0];
+        if (state.isShuffled) {
+          // シャッフル時は、未解答インデックスがシャッフル配列の何番目にあるかを探す
+          state.currentIndex = state.shuffledIndices.indexOf(
+            unsolvedIndices[0]
+          );
+        } else {
+          state.currentIndex = unsolvedIndices[0];
+        }
         state.showAnswer = false;
         state.selectedOption = null;
 
@@ -851,46 +985,78 @@
         saveState();
       }
 
-      // シャッフル機能
+      // シャッフル機能（最適化版）
       function shuffleWords() {
         if (state.isLoading || state.words.length === 0) return;
 
-        if (state.isShuffled) {
-          // シャッフル解除（元の順序に戻す）
-          state.isShuffled = false;
-          state.shuffledIndices = [];
-          state.currentIndex = 0;
-          
-          document.getElementById("shuffleBtn").textContent = "🔀 シャッフル";
-          document.getElementById("shuffleBtn").style.background = "#6c757d";
-          
-          alert("単語の順序を元に戻しました。");
-        } else {
-          // シャッフル実行
-          state.shuffledIndices = Array.from({length: state.words.length}, (_, i) => i);
-          
-          // Fisher-Yates シャッフルアルゴリズム
-          for (let i = state.shuffledIndices.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [state.shuffledIndices[i], state.shuffledIndices[j]] = 
-            [state.shuffledIndices[j], state.shuffledIndices[i]];
-          }
-          
-          state.isShuffled = true;
-          state.currentIndex = 0;
-          
-          document.getElementById("shuffleBtn").textContent = "🔄 元の順序";
-          document.getElementById("shuffleBtn").style.background = "#28a745";
-          
-          alert(`${state.words.length}個の単語をシャッフルしました！`);
-        }
+        // デバウンス：連続クリックを防ぐ
+        if (state.isShuffling) return;
+        state.isShuffling = true;
 
-        // 表示を更新
-        state.showAnswer = false;
-        state.selectedOption = null;
-        updateDisplay();
-        updateWordList();
-        saveState();
+        // ボタンを一時的に無効化
+        const shuffleBtn = document.getElementById("shuffleBtn");
+        shuffleBtn.disabled = true;
+        shuffleBtn.style.opacity = "0.6";
+
+        // 非同期処理で重い処理を分割
+        setTimeout(() => {
+          try {
+            if (state.isShuffled) {
+              // シャッフル解除（元の順序に戻す）
+              state.isShuffled = false;
+              state.shuffledIndices = [];
+              state.currentIndex = 0;
+
+              shuffleBtn.textContent = "🔀 シャッフル";
+              shuffleBtn.style.background = "#6c757d";
+
+              alert("単語の順序を元に戻しました。");
+            } else {
+              // シャッフル実行（最適化済み）
+              const length = state.words.length;
+              state.shuffledIndices = new Array(length);
+
+              // 初期化を高速化
+              for (let i = 0; i < length; i++) {
+                state.shuffledIndices[i] = i;
+              }
+
+              // Fisher-Yates シャッフルアルゴリズム（最適化版）
+              for (let i = length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                const temp = state.shuffledIndices[i];
+                state.shuffledIndices[i] = state.shuffledIndices[j];
+                state.shuffledIndices[j] = temp;
+              }
+
+              state.isShuffled = true;
+              state.currentIndex = 0;
+
+              shuffleBtn.textContent = "🔄 元の順序";
+              shuffleBtn.style.background = "#28a745";
+
+              alert(`${length}個の単語をシャッフルしました！`);
+            }
+
+            // 表示を更新（非同期で分割）
+            state.showAnswer = false;
+            state.selectedOption = null;
+
+            // 更新を段階的に実行
+            updateDisplay();
+
+            // 単語リスト更新を遅延実行
+            setTimeout(() => {
+              updateWordList();
+              saveState();
+            }, 50);
+          } finally {
+            // ボタンを再有効化
+            state.isShuffling = false;
+            shuffleBtn.disabled = false;
+            shuffleBtn.style.opacity = "1";
+          }
+        }, 10);
       }
 
       // 現在の実際のインデックスを取得（シャッフル対応）
@@ -901,11 +1067,19 @@
         return state.currentIndex;
       }
 
+      // グローバル関数として現在の単語インデックスを取得（HTMLから呼び出し用）
+      function getCurrentActualIndex() {
+        return getCurrentWordIndex();
+      }
+
       // 現在の単語を取得（シャッフル対応）
       function getCurrentWord() {
         const actualIndex = getCurrentWordIndex();
         return state.words[actualIndex];
       }
+
+      // 進捗リセット
+      function resetProgress() {
         if (confirm("学習進捗をリセットしますか？この操作は元に戻せません。")) {
           state.currentIndex = 0;
           state.correctAnswers = 0;
@@ -916,6 +1090,14 @@
           state.currentFilter = "all";
           state.isShuffled = false;
           state.shuffledIndices = [];
+
+          // ブックマークもリセットするか確認
+          if (state.bookmarkedWords.size > 0) {
+            if (confirm("ブックマークもリセットしますか？")) {
+              state.bookmarkedWords.clear();
+              saveBookmarks();
+            }
+          }
 
           // シャッフルボタンの表示を元に戻す
           document.getElementById("shuffleBtn").textContent = "🔀 シャッフル";
@@ -983,6 +1165,7 @@
         }
 
         updateProgress();
+        updateBookmarkButton(); // ブックマークボタンの状態を更新
       }
 
       // 進捗更新
@@ -1022,40 +1205,79 @@
         saveState();
       }
 
-      // クイズ選択肢生成
+      // クイズ選択肢生成（最適化版）
       function generateQuizOptions(correctWord) {
         const options = [correctWord.meaning];
-        const usedIndices = new Set([state.currentIndex]);
+        const actualIndex = getCurrentWordIndex();
 
-        while (options.length < 4 && usedIndices.size < state.words.length) {
-          const randomIndex = Math.floor(Math.random() * state.words.length);
-          if (!usedIndices.has(randomIndex)) {
-            usedIndices.add(randomIndex);
-            options.push(state.words[randomIndex].meaning);
+        // 効率的な選択肢生成：事前に候補リストを作成
+        const candidateIndices = [];
+        for (let i = 0; i < state.words.length; i++) {
+          if (
+            i !== actualIndex &&
+            state.words[i].meaning !== correctWord.meaning
+          ) {
+            candidateIndices.push(i);
           }
         }
 
+        // Fisher-Yatesシャッフルで3個の選択肢を選択
+        for (
+          let i = candidateIndices.length - 1;
+          i > 0 && options.length < 4;
+          i--
+        ) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [candidateIndices[i], candidateIndices[j]] = [
+            candidateIndices[j],
+            candidateIndices[i],
+          ];
+          options.push(state.words[candidateIndices[i]].meaning);
+        }
+
+        // 選択肢が4個に満たない場合の補完
+        while (
+          options.length < 4 &&
+          candidateIndices.length > options.length - 1
+        ) {
+          const randomIndex = candidateIndices[options.length - 1];
+          if (randomIndex !== undefined) {
+            options.push(state.words[randomIndex].meaning);
+          } else {
+            break;
+          }
+        }
+
+        // 最終的な選択肢をシャッフル
         for (let i = options.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [options[i], options[j]] = [options[j], options[i]];
         }
 
+        // DOM更新を最適化
         const container = document.getElementById("quizOptions");
         const existingButtons = container.querySelectorAll(".quiz-option");
 
+        // 既存のボタンを再利用
         options.forEach((option, index) => {
           let button = existingButtons[index];
           if (!button) {
             button = document.createElement("button");
             button.className = "quiz-option";
-            button.onclick = () => selectOption(index, option);
             container.appendChild(button);
           }
-          button.textContent = option;
+
+          // テキストが変わった場合のみ更新
+          if (button.textContent !== option) {
+            button.textContent = option;
+          }
+
+          // クラスとイベントを設定
           button.className = "quiz-option";
           button.onclick = () => selectOption(index, option);
         });
 
+        // 余分なボタンを削除
         for (let i = options.length; i < existingButtons.length; i++) {
           existingButtons[i].remove();
         }
@@ -1103,25 +1325,44 @@
         saveState();
       }
 
-      // 次のクイズ
+      // 次のクイズ（最適化版）
       function nextQuiz() {
         if (state.isLoading) return;
 
         state.currentIndex = (state.currentIndex + 1) % state.words.length;
         state.selectedOption = null;
 
+        // 選択肢のクラスを効率的にリセット
         const options = document.querySelectorAll(".quiz-option");
-        options.forEach((opt) => (opt.className = "quiz-option"));
+        options.forEach((opt) => {
+          if (opt.className !== "quiz-option") {
+            opt.className = "quiz-option";
+          }
+        });
 
         const word = getCurrentWord();
-        document.getElementById("quizWord").textContent = word.lemma;
-        document.getElementById(
-          "quizInfo"
-        ).textContent = `SFI Rank: ${word.sfiRank}`;
+        const quizWordElement = document.getElementById("quizWord");
+        const quizInfoElement = document.getElementById("quizInfo");
+
+        // テキスト更新の最適化
+        if (quizWordElement.textContent !== word.lemma) {
+          quizWordElement.textContent = word.lemma;
+        }
+
+        const newQuizInfo = `SFI Rank: ${word.sfiRank}`;
+        if (quizInfoElement.textContent !== newQuizInfo) {
+          quizInfoElement.textContent = newQuizInfo;
+        }
+
         generateQuizOptions(word);
 
         updateProgress();
-        updateWordListItem(getCurrentWordIndex());
+
+        // 単語リスト更新を遅延実行
+        setTimeout(() => {
+          updateWordListItem(getCurrentWordIndex());
+        }, 10);
+
         saveState();
       }
 
@@ -1153,30 +1394,58 @@
         });
       }
 
-      // 単語リスト更新
+      // 単語リスト更新（最適化版）
       function updateWordList() {
         const list = document.getElementById("wordList");
-        list.innerHTML = "";
+        const currentActualIndex = getCurrentWordIndex();
 
+        // 既存のアイテムを取得
+        const existingItems = list.querySelectorAll(".word-item");
+        const itemsToKeep = [];
+
+        // フィルタリングされた単語のインデックスを取得
+        const filteredIndices = [];
         state.words.forEach((word, index) => {
           const result = state.wordResults.get(index);
+          const isBookmarked = state.bookmarkedWords.has(index);
 
           // フィルター適用
           if (state.currentFilter === "unsolved" && result) return;
           if (state.currentFilter === "correct" && result !== "correct") return;
           if (state.currentFilter === "incorrect" && result !== "incorrect")
             return;
+          if (state.currentFilter === "bookmarked" && !isBookmarked) return;
 
-          const item = document.createElement("div");
-          item.className = "word-item";
+          filteredIndices.push(index);
+        });
 
-          // 状態に応じてクラスを追加
-          if (index === state.currentIndex) item.classList.add("active");
-          if (result === "correct") item.classList.add("solved");
-          if (result === "incorrect") item.classList.add("incorrect");
+        // 既存のアイテムを再利用または新規作成
+        filteredIndices.forEach((index, listIndex) => {
+          const word = state.words[index];
+          const result = state.wordResults.get(index);
+          const isBookmarked = state.bookmarkedWords.has(index);
 
-          // HTML構造を作成
-          item.innerHTML = `
+          let item = existingItems[listIndex];
+          if (!item) {
+            item = document.createElement("div");
+            list.appendChild(item);
+          }
+          itemsToKeep.push(item);
+
+          // クラス設定を最適化
+          const newClassName =
+            "word-item" +
+            (index === currentActualIndex ? " active" : "") +
+            (result === "correct" ? " solved" : "") +
+            (result === "incorrect" ? " incorrect" : "") +
+            (isBookmarked ? " bookmarked" : "");
+
+          if (item.className !== newClassName) {
+            item.className = newClassName;
+          }
+
+          // HTML内容の更新（変更がある場合のみ）
+          const newHTML = `
                     <div class="word-info-left">
                         <strong>${word.lemma}</strong><br>
                         <small>Rank: ${word.sfiRank}</small>
@@ -1186,25 +1455,38 @@
                     </div>
                 `;
 
-          item.onclick = () => {
-            if (state.isLoading) return;
-            
-            // シャッフル時は実際のインデックスから表示インデックスを逆算
-            if (state.isShuffled) {
-              state.currentIndex = state.shuffledIndices.indexOf(index);
-            } else {
-              state.currentIndex = index;
-            }
-            
-            state.showAnswer = false;
-            state.selectedOption = null;
-            updateDisplay();
-            updateWordListItem(index);
-            saveState();
-          };
+          if (item.innerHTML !== newHTML) {
+            item.innerHTML = newHTML;
+          }
 
-          list.appendChild(item);
+          // イベントリスナーを効率的に設定
+          item.onclick = createWordClickHandler(index);
         });
+
+        // 余分なアイテムを削除
+        for (let i = itemsToKeep.length; i < existingItems.length; i++) {
+          existingItems[i].remove();
+        }
+      }
+
+      // 単語クリックハンドラー作成（クロージャを避けるため）
+      function createWordClickHandler(index) {
+        return function () {
+          if (state.isLoading) return;
+
+          // シャッフル時は実際のインデックスから表示インデックスを逆算
+          if (state.isShuffled) {
+            state.currentIndex = state.shuffledIndices.indexOf(index);
+          } else {
+            state.currentIndex = index;
+          }
+
+          state.showAnswer = false;
+          state.selectedOption = null;
+          updateDisplay();
+          updateWordListItem(index);
+          saveState();
+        };
       }
 
       // 状態に応じたクラス名を取得
@@ -1241,12 +1523,20 @@
             state.wordResults.clear();
             state.isLoading = false;
             state.currentFilter = "all";
+            state.isShuffled = false;
+            state.shuffledIndices = [];
+            state.bookmarkedWords.clear(); // ブックマークもリセット
+
+            // シャッフルボタンの表示を元に戻す
+            document.getElementById("shuffleBtn").textContent = "🔀 シャッフル";
+            document.getElementById("shuffleBtn").style.background = "#6c757d";
 
             updateDisplay();
             updateStats();
             updateWordList();
             setFilter("all");
             saveState();
+            saveBookmarks(); // ブックマークの変更を保存
 
             alert(words.length + "個の単語を読み込みました！");
           }
