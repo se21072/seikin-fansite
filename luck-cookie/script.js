@@ -90,6 +90,20 @@ clickButton.addEventListener('click', () => {
     updateGambleUI(); // クッキー数変動でUI更新
 });
 
+// --- Enterキーの連打防止 ---
+let enterPressed = false;
+clickButton.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !enterPressed) {
+        enterPressed = true;
+        clickButton.click();
+    }
+});
+clickButton.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') {
+        enterPressed = false;
+    }
+});
+
 // --- ギャンブルUIの更新ロジック ---
 // 投入クッキースライダーのイベントリスナー
 gambleAmountSlider.addEventListener('input', updateGambleUI);
