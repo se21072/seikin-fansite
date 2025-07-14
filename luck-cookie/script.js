@@ -66,10 +66,25 @@ function initializeGame() {
     luckPointCountElement.textContent = luckPoints; // 運ポイント表示を初期化
     gambleResultElement.textContent = '';
     gameOverScreen.style.display = 'none';
+    
+    // ボタン機能の完全復元
     clickButton.disabled = false;
     gambleButton.disabled = false;
+    
+    // タブ操作を有効化
+    clickButton.tabIndex = 0;
+    gambleButton.tabIndex = 0;
+    
+    // 表示の復元
     clickButton.style.display = 'block';
     gambleButton.style.display = 'block';
+    clickButton.hidden = false;
+    gambleButton.hidden = false;
+    
+    // アクセシビリティ属性の復元
+    clickButton.removeAttribute('aria-disabled');
+    gambleButton.removeAttribute('aria-disabled');
+    
     timerElement.parentElement.style.display = 'block';
 
     // スライダーの初期化
@@ -231,16 +246,31 @@ function startGame() {
 function endGame() {
     clearInterval(timerInterval);
     clearInterval(luckPointTimer);
+    
+    // 完全なボタン無効化措置
     clickButton.disabled = true;
     gambleButton.disabled = true;
+    
+    // タブ操作での到達を完全に防ぐ
+    clickButton.tabIndex = -1;
+    gambleButton.tabIndex = -1;
+    
+    // 完全に非表示化
+    clickButton.style.display = 'none';
+    gambleButton.style.display = 'none';
+    clickButton.hidden = true;
+    gambleButton.hidden = true;
+    
+    // スクリーンリーダー対応
+    clickButton.setAttribute('aria-disabled', 'true');
+    gambleButton.setAttribute('aria-disabled', 'true');
+    
     gameOverScreen.style.display = 'flex';
     finalCookieCountElement.textContent = cookies;
     
     saveHighScore(cookies); // ★追加: ゲーム終了時にスコアを保存
     displayHighScores(); // ★追加: ゲーム終了時にランキングを再表示
 
-    clickButton.style.display = 'none';
-    gambleButton.style.display = 'none';
     timerElement.parentElement.style.display = 'none';
 }
 
@@ -281,6 +311,28 @@ function displayHighScores() {
 // --- リスタートボタン ---
 restartButton.addEventListener('click', () => {
     initializeGame();
+});
+
+// --- キーボードイベント防止（ゲームオーバー時） ---
+document.addEventListener('keydown', (event) => {
+    // ゲーム終了状態でない場合は何もしない
+    if (gameOverScreen.style.display !== 'flex') {
+        return;
+    }
+    
+    // Enter または Space キーの場合
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+        // フォーカスされている要素を取得
+        const focusedElement = document.activeElement;
+        
+        // フォーカスされている要素がゲームボタンの場合はイベントを無効化
+        if (focusedElement === clickButton || focusedElement === gambleButton) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            return false;
+        }
+    }
 });
 
 // ページロード時に初期化
