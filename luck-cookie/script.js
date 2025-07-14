@@ -37,6 +37,7 @@ const luckPointConsumptionDisplay = document.getElementById('luck-point-consumpt
 const predictedSuccessRateElement = document.getElementById('predicted-success-rate');
 
 const highScoresList = document.getElementById('high-scores-list'); // ランキングリストのUL要素
+const cookieForm = document.getElementById('cookie-form'); // クッキーフォーム要素
 // 効果音ファイルのパス
 const successSoundPath = 'sounds/harakiridrive.mp3'; // 成功時の効果音
 const failureSoundPath = 'sounds/failure.mp3'; // 失敗時の効果音 (任意で追加)
@@ -48,6 +49,12 @@ const failureAudio = new Audio(failureSoundPath);
 // 音量の調整（0.0から1.0の範囲で設定）
 successAudio.volume = 0.5;
 failureAudio.volume = 0.7;
+
+// --- フォーム送信防止 ---
+cookieForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    // クッキーを焼く処理は既存のclick eventで処理される
+});
 
 
 // --- ゲーム初期化 ---
