@@ -90,6 +90,13 @@ clickButton.addEventListener('click', () => {
     updateGambleUI(); // クッキー数変動でUI更新
 });
 
+// クッキーを焼くボタンにキーボードからのクリック発火を禁止
+clickButton.addEventListener('keydown', function(e) {
+    if (e.code === 'Space' || e.code === 'Enter') {
+        e.preventDefault();
+    }
+});
+
 // --- ギャンブルUIの更新ロジック ---
 // 投入クッキースライダーのイベントリスナー
 gambleAmountSlider.addEventListener('input', updateGambleUI);
