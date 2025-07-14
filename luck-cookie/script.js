@@ -68,6 +68,8 @@ function initializeGame() {
     gameOverScreen.style.display = 'none';
     clickButton.disabled = false;
     gambleButton.disabled = false;
+    clickButton.tabIndex = 0;
+    gambleButton.tabIndex = 0;
     clickButton.style.display = 'block';
     gambleButton.style.display = 'block';
     timerElement.parentElement.style.display = 'block';
@@ -233,6 +235,8 @@ function endGame() {
     clearInterval(luckPointTimer);
     clickButton.disabled = true;
     gambleButton.disabled = true;
+    clickButton.tabIndex = -1;
+    gambleButton.tabIndex = -1;
     gameOverScreen.style.display = 'flex';
     finalCookieCountElement.textContent = cookies;
     
