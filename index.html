@@ -2,228 +2,167 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>💋 SEIKINFANSITE - 完全覚醒モード 💋</title>
+  <title>SEIKIN Projects Portfolio</title>
   <style>
+    :root {
+      --bg-start: #f7f2ff;
+      --bg-end: #fff7fb;
+      --text-main: #443055;
+      --text-sub: #6d5c7b;
+      --accent: #c770ff;
+      --accent-strong: #8c3aff;
+    }
+
     body {
-      font-family: 'Hiragino Kaku Gothic Pro', sans-serif;
-      background: linear-gradient(to bottom right, #ffe0e0, #fff0f0);
-      text-align: center;
-      padding-top: 60px;
-      color: #d63384;
+      font-family: 'Hiragino Kaku Gothic Pro', 'Noto Sans JP', sans-serif;
       margin: 0;
-      transition: background 1s ease;
+      background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    h1 {
-      font-size: 2.5em;
-      margin-bottom: 10px;
-      animation: popIn 0.8s ease-out;
+    header {
+      padding: 80px 24px 40px;
+      text-align: center;
     }
 
-    @keyframes popIn {
-      from { transform: scale(0.8); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+    header h1 {
+      margin: 0;
+      font-size: 3rem;
+      letter-spacing: 0.1em;
     }
 
-    button {
-      padding: 18px 40px;
-      font-size: 1.4em;
-      background: linear-gradient(45deg, #ff6ec4, #f72599);
-      color: white;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-      box-shadow: 0 8px 15px rgba(255, 50, 120, 0.3);
-      transition: all 0.3s ease;
-      margin: 10px;
+    header p {
+      margin: 16px auto 0;
+      max-width: 520px;
+      font-size: 1.1rem;
+      color: var(--text-sub);
+      line-height: 1.8;
     }
 
-    button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 10px 20px rgba(255, 50, 120, 0.5);
+    main {
+      flex: 1;
+      padding: 0 24px 80px;
     }
 
-    #result {
-      margin-top: 30px;
-      font-size: 1.8em;
-      opacity: 0;
-      animation: fadeIn 1s forwards;
+    .intro {
+      max-width: 720px;
+      margin: 0 auto 40px;
+      text-align: center;
     }
 
-    #character {
-      width: 300px;
-      height: auto;
-      margin: 20px auto;
-      display: block;
-      opacity: 0;
-      animation: fadeIn 1.5s forwards;
-      transition: transform 0.3s ease;
-      cursor: pointer;
+    .intro h2 {
+      font-size: 1.8rem;
+      margin-bottom: 12px;
     }
 
-    #character:hover {
-      transform: scale(1.05) rotate(1deg);
+    .intro p {
+      margin: 0 auto;
+      color: var(--text-sub);
+      line-height: 1.8;
     }
 
-    .sound-toggle,
-    .mode-toggle {
-      margin-top: 20px;
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      max-width: 960px;
+      margin: 0 auto;
     }
 
-    .sound-toggle input[type="checkbox"],
-    .mode-toggle input[type="checkbox"] {
-      transform: scale(1.5);
-      accent-color: hotpink;
+    .card {
+      background: rgba(255, 255, 255, 0.78);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 18px 40px rgba(116, 87, 138, 0.18);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      text-align: left;
     }
 
-    .footer {
-      margin-top: 60px;
-      font-size: 0.9em;
-      color: #aaa;
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 60px rgba(116, 87, 138, 0.24);
     }
 
-    @keyframes fadeIn {
-      to { opacity: 1; }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.6rem;
+    }
+
+    .card p {
+      color: var(--text-sub);
+      line-height: 1.6;
+      margin: 12px 0 24px;
+    }
+
+    .card a {
+      display: inline-block;
+      padding: 12px 20px;
+      border-radius: 999px;
+      background: linear-gradient(120deg, var(--accent), var(--accent-strong));
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      transition: filter 0.2s ease;
+    }
+
+    .card a:hover {
+      filter: brightness(1.05);
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    @media (max-width: 520px) {
+      header h1 {
+        font-size: 2.4rem;
+      }
+
+      .intro h2 {
+        font-size: 1.6rem;
+      }
     }
   </style>
 </head>
 <body>
+  <header>
+    <h1>SEIKIN PROJECTS</h1>
+    <p>個人で制作したプロジェクトをまとめたポートフォリオです。遊べるアプリから学習支援ツールまで、継続的にアップデートしています。</p>
+  </header>
 
-  <h1>💋 SEIKINFANSITE 完全覚醒モード 💋</h1>
-  <button onclick="onButtonClick()">もっと…感じて…♡</button>
+  <main>
+    <section class="intro">
+      <h2>現在公開中のコンテンツ</h2>
+      <p>ブラウザから手軽にアクセスできるよう、それぞれ独立したページとして公開しています。開発意図や学びのポイントも随時追記予定です。</p>
+    </section>
 
-  <div id="result"></div>
-  <img id="character" src="" />
+    <section class="portfolio-grid">
+      <article class="card">
+        <h3>Luck Cookie</h3>
+        <p>日替わりのメッセージと演出で運勢を楽しめるWebアプリ。アニメーションとサウンドで体験を演出しています。</p>
+        <a href="luck-cookie/" target="_blank" rel="noopener">Luck Cookieを開く</a>
+      </article>
 
-  <!-- 音声プレイヤー -->
-  <audio id="soundEffect"></audio>
+      <article class="card">
+        <h3>NGSL Explorer</h3>
+        <p>New General Service Listを活用した英単語学習サポート。CSVデータをもとに、語彙の確認や検索を行えるようにしています。</p>
+        <a href="NGSL/" target="_blank" rel="noopener">NGSLページへ</a>
+      </article>
 
-  <!-- 音声再生モード切替 -->
-  <div class="sound-toggle">
-    <label>
-      <input type="checkbox" id="soundToggle" checked>
-      効果音ON/OFF
-    </label>
-  </div>
+      <article class="card">
+        <h3>TOEIC Lab</h3>
+        <p>TOEIC学習のための素材をまとめた実験的サイト。スコアアップに向けたコンテンツを toeic.seikin.games ドメインで公開予定です。</p>
+        <a href="https://toeic.seikin.games" target="_blank" rel="noopener">toeic.seikin.games</a>
+      </article>
+    </section>
+  </main>
 
-  <div class="mode-toggle">
-    <label>
-      <input type="checkbox" id="randomSoundMode" checked>
-      音声をランダム再生
-    </label>
-  </div>
-
-  <div class="footer">© 2025 SEIKINFANSITE</div>
-
-  <script>
-    const messages = [
-      { text: "んふふ…また触れてほしいです…", emotion: "shy" },
-      { text: "あなたが好き…ずっと見つめてて…", emotion: "love" },
-      { text: "恥ずかしいけど…気持ちいい…", emotion: "blush" },
-      { text: "もっと…奥まで…届いてる…", emotion: "passion" },
-      { text: "ドキドキが止まらない～💦", emotion: "excite" }
-    ];
-
-    const images = [
-      "img/SEXY1.jpg",
-      "img/SEXY2.jpg",
-      "img/SEXY3.jpg",
-      "img/hikakinsexy.jpg",
-      "img/hikakinsexy1.jpg",
-      "img/hikakinsexy2.jpg"
-      ];
-
-    const sounds = [
-      "sound/haishikoro.mp3",
-      "sound/sexy_sound.mp3",
-      "sound/hikakin-itazuranoyu.mp3"
-    ];
-
-    let currentIndex = 0;
-    let currentSoundIndex = 0;
-
-    // カラーパレット（感情ごと）
-    const colors = {
-      shy: "#ffb3d9",
-      love: "#ff66cc",
-      blush: "#ff80aa",
-      passion: "#ff4da6",
-      excite: "#ff1a99"
-    };
-
-    function getRandomColor() {
-      const keys = Object.keys(colors);
-      return colors[keys[Math.floor(Math.random() * keys.length)]];
-    }
-
-    function getGradientColor() {
-      const color1 = getRandomColor();
-      const color2 = getRandomColor();
-      return `linear-gradient(to bottom right, ${color1}, ${color2})`;
-    }
-
-    function onButtonClick() {
-      // 背景変更
-      document.body.style.background = getGradientColor();
-
-      // メッセージランダム表示
-      const randomIndex = Math.floor(Math.random() * messages.length);
-      const messageData = messages[randomIndex];
-      const result = document.getElementById('result');
-      result.textContent = messageData.text;
-      result.style.color = colors[messageData.emotion];
-
-      // 画像切り替え
-      currentIndex = (currentIndex + 1) % images.length;
-      const imgElement = document.getElementById("character");
-      imgElement.src = images[currentIndex];
-
-      // アニメーションリセット
-      void imgElement.offsetWidth;
-      imgElement.style.opacity = 0;
-      setTimeout(() => {
-        imgElement.style.opacity = 1;
-      }, 50);
-
-      // 効果音再生
-      const soundToggle = document.getElementById("soundToggle").checked;
-      if (soundToggle) {
-        const sound = document.getElementById("soundEffect");
-
-        // 再生モード判定
-        if (document.getElementById("randomSoundMode").checked) {
-          currentSoundIndex = Math.floor(Math.random() * sounds.length);
-        }
-
-        sound.src = sounds[currentSoundIndex];
-        sound.currentTime = 0;
-        sound.play();
-
-        currentSoundIndex = (currentSoundIndex + 1) % sounds.length;
-      }
-
-      // ローカルストレージ保存
-      localStorage.setItem("lastMessage", messageData.text);
-      localStorage.setItem("lastImage", images[currentIndex]);
-    }
-
-    // 前回状態を復元
-    window.onload = () => {
-      const lastMessage = localStorage.getItem("lastMessage");
-      const lastImage = localStorage.getItem("lastImage");
-
-      if (lastMessage) {
-        document.getElementById("result").textContent = lastMessage;
-      }
-
-      if (lastImage) {
-        const imgElement = document.getElementById("character");
-        imgElement.src = lastImage;
-        imgElement.style.display = "block";
-        imgElement.style.opacity = 1;
-      }
-    };
-  </script>
-
+  <footer>© 2025 SEIKIN</footer>
 </body>
 </html>
